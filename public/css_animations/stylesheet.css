@@ -1,0 +1,146 @@
+body {
+  background-color: none;
+  background: transparent;
+}
+
+div {
+    text-align: center;
+    animation-timing-function: cubic-bezier(.35,0,.65,1);
+}
+
+.text-container {
+  display: inline-block;
+  margin-top: 40px;
+}
+
+body > div {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+#animate-me1 {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  display: inline-block;
+  background-color: red;
+  color: black;
+
+  animation-name: example;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-delay: 2s;
+  animation-direction: alternate;
+}
+
+
+
+/* Standard syntax */
+@keyframes example {
+    from {
+      background-color: red;
+      top: 0px;
+    }
+    to {
+      background-color: yellow;
+      top: 100px;
+    }
+}
+
+
+
+#animate-me2 {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  display: inline-block;
+  background-color: red;
+  color: black;
+
+  animation-name: example2;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-delay: 1.5s;
+  animation-direction: alternate;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes example2 {
+    from {background-color: red;}
+    to {background-color: yellow;}
+}
+
+/* Standard syntax */
+@keyframes example2 {
+    from {
+      background-color: red;
+      top: 0px;
+    }
+    to {
+      background-color: yellow;
+
+      top: 100px;
+    }
+  
+}
+body {
+  background-color: black;
+}
+
+#animate-me3 {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  display: inline-block;
+  background-color: red;
+  color: black;
+
+  animation-name: example3;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-delay: 1s;
+  animation-direction: alternate;
+}
+
+
+/* Standard syntax */
+@keyframes example3 {
+    from {
+      background-color: red;
+      top: 0px;
+    }
+    to {
+      background-color: yellow;
+      top: 100px;
+    }
+}
+
+
+#animate-me4 {
+  width: 100px;
+  height: 100px;
+  position: relative;
+   display: inline-block;
+  background-color: red;
+  color: black;
+
+  animation-name: example4;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-delay: .5s;
+  animation-direction: alternate;
+}
+
+
+/* Standard syntax */
+@keyframes example4 {
+    from {
+      background-color: red;
+      top: 0px;
+    }
+    to {
+      background-color: yellow;
+      top: 100px;
+    }
+}
+
