@@ -2,12 +2,8 @@
 <html>
 <head>
   <!-- Sets up socket.io-client for browser -->
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // Notice that I’m not specifying any URL when I call io(), since it defaults to trying to connect to the host that serves the page.
-    var socket = io();
 
-  </script>
+
   
   <title>Chat (Echo Me 2.0)</title>
   
@@ -53,163 +49,10 @@
     <button id='toggle-mute'>Turn Sound Off</button>
     
     <!-- action="#" prevents page from refreshing (after first submission) on form submission if for some reason ev.preventDefault(); doesn't work. -->
-    <form id="chat-input" action="#">
-      <input id="m" type="text" autocomplete="off" /><button>Send</button>
+    <form id="chat-form" action="#">
+      <input id="chat-form-input" type="text" autocomplete="off" /><button>Send</button>
     </form>
-    
-    <script>
-      console.log('Existing cookies before script loads: [' + document.cookie + ']');
-        function scrollMessagesDown() {
-          var objDiv = document.getElementById('message-container');
-          objDiv.scrollTop = objDiv.scrollHeight;
-        }
-      
-        function manageSound(sound) {
-          if (manageSound.muteAll !== true) {
-            sound.play();
-          } else {
-            console.log(sound.getAttribute('id') + ' is muted');
-          }
-        }
-      
-      function loadMuteState() {
-        var button = document.getElementById('toggle-mute');
-        var keyValuePairs = document.cookie.split(/; */);
-        for(var i = 0; i < keyValuePairs.length; i++) {
-          var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
-          var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
-          if (name === 'mute-status' && value === 'muted') {
-            manageSound.muteAll = true;
-            button.innerHTML = 'Turn Sound On';
-          } 
-          else if (name === 'mute-status' && value === 'not-muted') {
-            manageSound.muteAll = false;
-            button.innerHTML = 'Turn Sound Off';
-          }
-        }
-      }
-
-    loadMuteState();
-  
-      
-  
-      function setCookie(name, value, expDate) {
-        //If expDate exists then convert to UTC format
-        (expDate) && (expDate = expDate.toUTCString());
-        var c_value = encodeURI(value) + ((expDate === null || expDate === undefined) ? "" : "; expires=" + expDate);
-        document.cookie = name + "=" + c_value;
-      };
-      
-    
-     
-      handleServerEmits();
-      
-      function handleServerEmits() {
-        var messages = document.getElementById('messages')
-        socket.on('chat message', function(msg){
-          messages.innerHTML += '<li>' + msg + '</li>';
-          scrollMessagesDown();
-          var sound = document.getElementById('coin-get');
-          manageSound(sound);
-        });
-
-        socket.on('own chat message', function(msg){
-          alertClient(msg);
-          scrollMessagesDown();
-        });
-      };
-      handleMute('toggle-mute');
-      
-      function handleMute(buttonId) {
-        
-        button = document.getElementById(buttonId);
-        button.addEventListener('click', function(ev) {toggleMute(button)});
-        
-        function toggleMute(button) {
-          // If manageSound has been explicitly muted, then unmute it.
-          if (manageSound.muteAll) {
-            manageSound.muteAll = false;
-            button.innerHTML = 'Turn Sound Off';
-              // http://stackoverflow.com/questions/3818193/how-to-add-number-of-days-to-todays-date
-                var expDate = new Date();
-                var numberOfDaysToAdd = 183;
-                var cookies = document.cookie;
-                expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
-                setCookie('mute-status', 'not-muted', expDate);
-                console.log('Cookie change, current cookies: [' + document.cookie + ']');
-              // Easy way to delete cookie
-              //  document.cookie = 'cook' + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            
-          }
-          /* If manageSound.muteAll has been explicitly set to false, or has not been defined yet, mute.
-            (Because manageSound() only mutes if its muteAll property has been set to true, there
-            could be a case where muteAll has not been defined and we would want to mute on toggle if that's true.
-            Basically if muteAll has not been defined we want to default to not muting, but mute on toggle.) */
-          else {
-            manageSound.muteAll = true;
-            button.innerHTML = 'Turn Sound On'
-            
-                var expDate = new Date();
-                var numberOfDaysToAdd = 183;
-                var cookies = document.cookie;
-                expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
-                setCookie('mute-status', 'muted', expDate);
-                console.log('Cookie change, current cookies: [' + document.cookie + ']');
-          }
-          
-        }
-      }
-      
-      chatInputForm = document.getElementById("chat-input");
-      text = document.getElementById("m");
-      
-      chatInputForm.addEventListener("submit", function(ev){
-        // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
-        ev.preventDefault();
-        socket.emit('chat message', text.value);
-        text.value = "";
-      });
-      
-      function alertClient(msg) {
-        messages.innerHTML += '<li>' + msg + '</li>'
-      }
-      
-      /* Doesn't run on page load, but runs upon reconnect. Maybe it doesn't run on start up because the page is loaded already connected. Going to have page autoplay connection sound for now. */
-      function alertClientConnect() {
-        alertClient('Notice: Connection established!');
-        var sound = document.getElementById('yahhoo');
-        manageSound(sound);
-      }
-      alertClientConnect();
-      
-      function alertClientConnectionError() {
-        alertClient('Warning: Connection Issues!');
-        scrollMessagesDown();
-      }
-      
-      function alertClientDisconnect() {
-        alertClient('Warning: Disconnected!');
-        scrollMessagesDown();
-        var sound = document.getElementById('they-re-killing-me');
-        manageSound(sound);
-      }
-      
-      function alertClientReconnect() {
-        alertClient('Notice: Connection restablished!')
-        scrollMessagesDown();
-        var sound = document.getElementById('yahhoo');
-        manageSound(sound);
-      }
-      
-      function alertConnectionChange() {
-        socket.on('error', alertClientConnectionError);
-        socket.on('disconnect', alertClientDisconnect);
-        socket.on('reconnect', alertClientReconnect);
-      }
-      
-      setTimeout(alertConnectionChange, 3000);
-      
-   
-    </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/index_scripts/client.js"></script>
   </body>
 </html>
