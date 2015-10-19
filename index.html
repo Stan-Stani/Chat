@@ -72,22 +72,22 @@
           }
         }
       
-    function loadMuteState() {
-      var button = document.getElementById('toggle-mute');
-      var keyValuePairs = document.cookie.split(/; */);
-      for(var i = 0; i < keyValuePairs.length; i++) {
-        var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
-        var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
-        if (name === 'mute-status' && value === 'muted') {
-          manageSound.muteAll = true;
-          button.innerHTML = 'Turn Sound On';
-        } 
-        else if (name === 'mute-status' && value === 'not-muted') {
-          manageSound.muteAll = false;
-          button.innerHTML = 'Turn Sound Off';
+      function loadMuteState() {
+        var button = document.getElementById('toggle-mute');
+        var keyValuePairs = document.cookie.split(/; */);
+        for(var i = 0; i < keyValuePairs.length; i++) {
+          var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
+          var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+          if (name === 'mute-status' && value === 'muted') {
+            manageSound.muteAll = true;
+            button.innerHTML = 'Turn Sound On';
+          } 
+          else if (name === 'mute-status' && value === 'not-muted') {
+            manageSound.muteAll = false;
+            button.innerHTML = 'Turn Sound Off';
+          }
         }
       }
-    }
 
     loadMuteState();
   
@@ -102,21 +102,22 @@
       
     
      
+      handleServerEmits();
       
-      
-      var messages = document.getElementById('messages')
-      socket.on('chat message', function(msg){
-        messages.innerHTML += '<li>' + msg + '</li>';
-        scrollMessagesDown();
-        var sound = document.getElementById('coin-get');
-        manageSound(sound);
-      });
-      
-      socket.on('own chat message', function(msg){
-        alertClient(msg);
-        scrollMessagesDown();
-      });
-      
+      function handleServerEmits() {
+        var messages = document.getElementById('messages')
+        socket.on('chat message', function(msg){
+          messages.innerHTML += '<li>' + msg + '</li>';
+          scrollMessagesDown();
+          var sound = document.getElementById('coin-get');
+          manageSound(sound);
+        });
+
+        socket.on('own chat message', function(msg){
+          alertClient(msg);
+          scrollMessagesDown();
+        });
+      };
       handleMute('toggle-mute');
       
       function handleMute(buttonId) {
