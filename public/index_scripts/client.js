@@ -106,6 +106,20 @@ function alertClientConnect() {
 }
 
 
+	var Notification = window.Notification || window.mozNotification || window.webkitNotification;
+
+	Notification.requestPermission(function (permission) {
+		console.log(permission);
+	});
+
+
+
+
+
+
+
+
+
 // Does things based off of the events emitted by the server
 function handleServerEmits() {
   var messages = document.getElementById('messages')
@@ -114,6 +128,9 @@ function handleServerEmits() {
     scrollMessagesDown();
     var sound = document.getElementById('coin-get');
     manageSound(sound);
+    if (handleBlurFocusEvents.windowBlurred) {
+      createNotification(msg);
+    }
   });
   
   // Doesn't play sound when client receives its own chat message back from the server
@@ -149,6 +166,33 @@ function handleServerEmits() {
       manageSound(sound);
     };
   };
+  
+  // Shows notification to user at bottom right of screen, regardless of whether the tab or browser containing the client is up
+  function createNotification(message) {
+    
+    var instance = new Notification(
+        "Message", {
+            body: message
+        }
+    );
+
+    instance.onclick = function () {
+        // Something to do
+    };
+    instance.onerror = function () {
+        // Something to do
+    };
+    instance.onshow = function () {
+        // Something to do
+    };
+    instance.onclose = function () {
+        // Something to do
+    };
+
+    setTimeout(instance.close.bind(instance), 4000);
+
+    return false;
+  }
 };
 
 // Emits events to server based off of things that happen in the client
@@ -163,7 +207,10 @@ function handleClientEmits() {
 
 // ! End of Central Functions' Definitions Section !
 
-
+// ! Reusable Component Functions' Initilizations Section!
+// Note that not all Reusable Component functions will have to be intialized and thus contained in this section.
+handleBlurFocusEvents()
+// ! End of Reusable Component Functions' Initilization Section!
 // ! Reusable Component Functions' Definitions Section !
 /* These are functions that are used (or will be used) in more than one Central Function (so they're defined once on the same level as the Central Functions as opposed to multiple times inside of the Central Functions). */
 
@@ -191,6 +238,22 @@ function manageSound(sound) {
     console.log(sound.getAttribute('id') + ' is muted');
   }
 }
+
+// Need to rename to take account of .onBlur
+function handleBlurFocusEvents() {
+  // Unsafe use as it will be overwritten if I ever need a function somewhere else to happen on blur/focus
+  var windowBlurred = false;
+  window.onblur = function() { handleBlurFocusEvents.windowBlurred = true;
+                              console.log('window is blurred');
+                             };
+  window.onfocus = function() { handleBlurFocusEvents.windowBlurred = false;
+                              console.log('window is focused');
+                              };
+  
+
+  
+}
+
 
 // ! End of Reusable Component Functions' Definitions Section !
 

@@ -1,0 +1,1 @@
+**Use your own asssets here for the client sounds. See client.js for the file names you should use.**

@@ -1,0 +1,1 @@
+**log.txt should automatically get written here when server receives chat messages.*
