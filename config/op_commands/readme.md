@@ -1,0 +1,1 @@
+**Enter a keyword into a utf8 formatted txt file called fixate.txt. The file must only have 1 line. This keyword when said in chat will let you force everyone to look at your message via an alert();**

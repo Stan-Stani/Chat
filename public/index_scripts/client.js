@@ -139,6 +139,11 @@ function handleServerEmits() {
     scrollMessagesDown();
   });
   
+  // Makes everyone's computers focus on the tab and page, even if they're in another program and fullscreened. Use sparingly. (Only tested in Windows.)
+  socket.on('fixate', function() {
+    alert("Yo, I'm tawkin to yeh!");
+  });
+  
   alertConnectionChanges();
   
   // Should eventually be split up between events that are acutally emitted by the server and events that the socket itself fires off

@@ -35,6 +35,7 @@ function startServingContent() {
     res.sendFile(__dirname + '/index.html');
   }); 
 
+
   /* sets up static server. Will serve exact paths to assets. Example path: localhost:3000/assets/Yahhoo.wav.
   Without the static server no assets on host machine are accessible by the app. */
   app.use(express.static(__dirname + '/public'));
@@ -76,22 +77,35 @@ function handleClientConnects() {
         registerClientState(socket, 'disconnected');
       };
     });
-
-
+    
+    // Saves config text for use in message commands
+    // The reason I don't have var "configTxt = filesys.readFile(...)" is because filesys only returns the file when the file is read and and everything
+    // else in the program will still try to execute, so configTxt would be undefined. I have to use a callback to define it and an configTxt has to be an object
+    // so the function captures the specific object and not a clone that doesn't link back to the object.
+  
+    function readContent(callback, setMe) {
+      filesys.readFile(__dirname + '/config/op_commands/fixate.txt', 'utf8', function (err, content) {
+          if (err) return callback(err)
+          callback(null, content, setMe)
+      })
+    }
+    var configTxt = {};
+    readContent(function (err, content, setMe) {setMe['content'] = content; }, configTxt);
+    
+    
     // Does stuff when client sends a 'chat message' event to the server
     socket.on('chat message', function(msg) {
-      var date = new Date();
       console.log(socket.handshake.address + ' says: ' + msg);
-      filesys.appendFile(__dirname + '/log/log.txt', socket.handshake.address+ ' on '+ date + ' says: ' + msg + nL, function(err) {
-        if (err) throw err;
-      });
-      
-      // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
-      socket.broadcast.emit('chat message', socket.handshake.address + ' says: ' + msg);
-      
-      // Emits the client's 'chat message' back to itself but under a new event name so the client knows it is receiving
-      // its own message and can then handle it differently from other clients' messages, if necessary.
-      socket.emit('own chat message', socket.handshake.address + ' says: ' + msg);
+      if (msg != configTxt['content']) {
+        // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
+        socket.broadcast.emit('chat message', socket.handshake.address + ' says: ' + msg);
+        
+        // Emits the client's 'chat message' back to itself but under a new event name so the client knows it is receiving
+        // its own message and can then handle it differently from other clients' messages, if necessary.
+        socket.emit('own chat message', socket.handshake.address + ' says: ' + msg);
+      } else {
+        io.emit('fixate');
+      };
     });
 
   });
