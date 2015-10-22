@@ -95,7 +95,13 @@ function handleClientConnects() {
     
     // Does stuff when client sends a 'chat message' event to the server
     socket.on('chat message', function(msg) {
+       var date = new Date();
       console.log(socket.handshake.address + ' says: ' + msg);
+      filesys.appendFile(__dirname + '/log/log.txt', socket.handshake.address+ ' on '+ date + ' says: ' + msg + nL, function(err) {
+         if (err) throw err;
+       });
+      
+
       if (msg != configTxt['content']) {
         // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
         socket.broadcast.emit('chat message', socket.handshake.address + ' says: ' + msg);
