@@ -16,6 +16,9 @@ var filesys = require('fs');
 
 // Sets nL to system specific newline character. In Unix like systems it's "\n" but in Windows it's "\n\r".
 var nL = require('os').EOL;
+
+
+
 // ! End of Global Variables Section !
 
 // ! Central Function Calls Section !
@@ -39,6 +42,9 @@ function startServingContent() {
   /* sets up static server. Will serve exact paths to assets. Example path: localhost:3000/assets/Yahhoo.wav.
   Without the static server no assets on host machine are accessible by the app. */
   app.use(express.static(__dirname + '/public'));
+  
+  // Adds favicon.
+  //app.use('/favicon.ico', express.static(__dirname + '/public/images/favicon.ico'));
 
   // Finishes serving initialization by starting server listening
   var port = 3000;
