@@ -59,6 +59,13 @@ function handleClientConnects() {
     //console.log(io.engine.clientsCount);
 
     registerClientConnect();
+    setTimeout(function () {
+      if (userName) {
+        io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
+      } else {
+        io.emit('chat message', socket.handshake.address + ' username currently undefined');
+      }
+    }, 500);
     
     // Tells all clients, the console, and the log that this client (socket) has connected
     function registerClientConnect() {
@@ -119,8 +126,6 @@ function handleClientConnects() {
     socket.on('username submit', function(name) {
       userName = name;
       qualifiedUserText = userName + ' ';
-      // Note that if client loses connnection and reconnects it is not automatically set to resubmit its username which it will need to do to have its name.
-      // Right now if that happened the user would need to refresh or manually re-enter their username to submt it.
       /* Will need to prevent users from entering names that create new lines in text document. Perhaps convert their names to hexadecimal.
       filesys.appendFile(__dirname + '/users/usernames.txt', userName + nL, function(err) {
          if (err) throw err;
