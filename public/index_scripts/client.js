@@ -30,6 +30,8 @@ cookiesInfo.printConsoleBeforeScriptLoad();
 
 loadMuteState();
 handleMuteToggle('toggle-mute');
+loadUsername();
+handleSetUsername();
 alertClientConnect();
 handleServerEmits();
 handleClientEmits();
@@ -97,6 +99,69 @@ function handleMuteToggle(buttonId) {
 
   }
 }
+
+function loadUsername() {
+  var button = document.getElementById('username');
+  var keyValuePairs = document.cookie.split(/; */);
+  for(var i = 0; i < keyValuePairs.length; i++) {
+    var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
+    var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
+    if (name && name === 'username') {
+      socket.emit('username submit', value);
+    }
+  }
+};
+
+function handleSetUsername() {
+  var button = document.getElementById('change-username');
+  var form = document.getElementById('change-username-form');
+  var input = document.getElementById('change-username-form-input');
+  var buttonState = 'not changing';
+  button.addEventListener('click', watchButtonAndForm);
+  
+  function watchButtonAndForm(ev) {
+    if (buttonState === 'not changing') {
+      buttonState = 'changing';
+      button.innerHTML = 'Save Username';
+      form.classList.toggle('hidden');
+      input.focus();
+      form.addEventListener('submit', innerWatcher);
+        
+    } else if (buttonState === 'changing') {
+      socket.emit('username submit', input.value);
+      input.blur();
+      form.classList.toggle('hidden');
+      button.innerHTML = 'Change Username';
+      buttonState = 'not changing';
+      var expDate = new Date();
+      var numberOfDaysToAdd = 183;
+      var cookies = document.cookie;
+      expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
+      setCookie('username', input.value, expDate);
+      cookiesInfo.printConsoleChange();
+      input.value = "";
+      form.addEventListener('submit', innerWatcher);
+    }
+    function innerWatcher(ev){
+        // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
+        ev.preventDefault();
+        socket.emit('username submit', input.value);
+        input.blur();
+        form.classList.toggle('hidden');
+        button.innerHTML = 'Change Username';
+        buttonState = 'not changing';
+        var expDate = new Date();
+        var numberOfDaysToAdd = 183;
+        var cookies = document.cookie;
+        expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
+        setCookie('username', input.value, expDate);
+        cookiesInfo.printConsoleChange();
+        input.value = "";
+        form.removeEventListener('submit', innerWatcher);
+      }
+  };
+};
+
 
 // Tells the client user that their client has connected.
 function alertClientConnect() {

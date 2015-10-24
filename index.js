@@ -16,9 +16,6 @@ var filesys = require('fs');
 
 // Sets nL to system specific newline character. In Unix like systems it's "\n" but in Windows it's "\n\r".
 var nL = require('os').EOL;
-
-
-
 // ! End of Global Variables Section !
 
 // ! Central Function Calls Section !
@@ -42,9 +39,6 @@ function startServingContent() {
   /* sets up static server. Will serve exact paths to assets. Example path: localhost:3000/assets/Yahhoo.wav.
   Without the static server no assets on host machine are accessible by the app. */
   app.use(express.static(__dirname + '/public'));
-  
-  // Adds favicon.
-  //app.use('/favicon.ico', express.static(__dirname + '/public/images/favicon.ico'));
 
   // Finishes serving initialization by starting server listening
   var port = 3000;
@@ -57,17 +51,18 @@ function startServingContent() {
 
 // Handles initial client connection and data interchange between server and client after that
 function handleClientConnects() {
-
   // Event listener, runs  callback function on a client (socket) connnection event that handles/takes care of this specific client connection
   io.on('connection', function(socket){
-
+    
+      var userName;
+      
     //console.log(io.engine.clientsCount);
 
     registerClientConnect();
     
     // Tells all clients, the console, and the log that this client (socket) has connected
     function registerClientConnect() {
-      registerClientState(socket, 'connected');
+      registerClientState(socket, 'connected', userName);
     }
     
     
@@ -80,7 +75,7 @@ function handleClientConnects() {
       
       // Tells all clients, the console, and the log that this client (socket) has disconnected
       function registerClientDisconnect() {
-        registerClientState(socket, 'disconnected');
+        registerClientState(socket, 'disconnected', userName);
       };
     });
     
@@ -100,24 +95,38 @@ function handleClientConnects() {
     
     
     // Does stuff when client sends a 'chat message' event to the server
+    var qualifiedUserText;
     socket.on('chat message', function(msg) {
        var date = new Date();
-      console.log(socket.handshake.address + ' says: ' + msg);
-      filesys.appendFile(__dirname + '/log/log.txt', socket.handshake.address+ ' on '+ date + ' says: ' + msg + nL, function(err) {
+      if (userName) {
+        qualifiedUserText = userName + " ";
+      } else {
+        qualifiedUserText = socket.handshake.address + " ";
+      };
+      console.log(qualifiedUserText + 'says: ' + msg);
+      filesys.appendFile(__dirname + '/log/log.txt', qualifiedUserText + 'on '+ date + ' says: ' + msg + nL, function(err) {
          if (err) throw err;
-       });
+      });
       
 
       if (msg != configTxt['content']) {
         // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
-        socket.broadcast.emit('chat message', socket.handshake.address + ' says: ' + msg);
+        socket.broadcast.emit('chat message', qualifiedUserText + 'says: ' + msg);
         
         // Emits the client's 'chat message' back to itself but under a new event name so the client knows it is receiving
         // its own message and can then handle it differently from other clients' messages, if necessary.
-        socket.emit('own chat message', socket.handshake.address + ' says: ' + msg);
+        socket.emit('own chat message', qualifiedUserText + 'says: ' + msg);
       } else {
         io.emit('fixate');
       };
+    });
+    
+    socket.on('username submit', function(name) {
+      userName = name;
+      /* Will need to prevent users from entering names that create new lines in text document. Perhaps convert their names to hexadecimal.
+      filesys.appendFile(__dirname + '/users/usernames.txt', userName + nL, function(err) {
+         if (err) throw err;
+      });*/
     });
 
   });
@@ -125,8 +134,12 @@ function handleClientConnects() {
   // This function is used to tell all clients, the console, and the log, the state of the client (as described by a string argument)
   // E.G. given that stateChangeDescriptor = 'disconnected', this function will cause a printing of '<example ip> disconnected' to
   // all clients, the console, and the log. 
-  function registerClientState(socket, stateChangeDescriptor) {
-    var textToRegister = socket.handshake.address + " " + stateChangeDescriptor;
+  function registerClientState(socket, stateChangeDescriptor, userName) {
+    if (userName) {
+      var textToRegister = userName + " " + stateChangeDescriptor;
+      } else {
+        var textToRegister = socket.handshake.address + " " + stateChangeDescriptor;
+      };
     io.emit('chat message', textToRegister);
     console.log(textToRegister);
     filesys.appendFile(__dirname + '/log/log.txt', textToRegister + nL, function(err) {
@@ -156,7 +169,10 @@ function handleServerShutdown() {
 
 function handleServerError() {
 //catches uncaught exceptions
-    process.on('uncaughtException', function(ev) {io.emit('chat message', 'Warning: Server error! You may become disconnected soon or features may no longer work!')});
+    process.on('uncaughtException', function(ev) {
+      io.emit('chat message', 'Warning: Server error! You may become disconnected soon or features may no longer work!')
+      console.log(ev);
+    });
 };
 
 // ! End of Central Functions' Definitions Section !

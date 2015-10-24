@@ -8,7 +8,7 @@
   <title>Chat (Echo Me 2.0)</title>
   
   <style>
-     ul, li, body, form, input, form button, div { margin: 0; padding: 0; box-sizing: border-box; }
+     ul, li, body, #chat-form, #chat-form-input, form button, div { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
       /* position: absolute & height/height: 100% so I can use percentages with #message-container */
       position: absolute;
@@ -18,10 +18,13 @@
       font: 13px Helvetica, Arial;
       color: white;
     }
+    .hidden {visibility: hidden;}
+    #change-username-form {position: fixed; top: 12.5px; right: 260px;}
+    #change-username {background-color: #333; padding: 3px; position: fixed; top: 10px; right: 120px; width: 130px; color: white;}
     #toggle-mute {background-color: #333; padding: 3px; position: fixed; top: 10px; right: 10px; width: 100px; color: white;}
     #hover-page {right:0px; position:fixed; height: 400px; width: 500px;}
-    form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-    form input { border: 0; padding: 10px; height: 2em; width: 90%; margin-right: .5%; }
+    #chat-form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+    #chat-form-input { border: 0; padding: 10px; height: 2em; width: 90%; margin-right: .5%; }
     form button { height: 2em; width: 9%; background: rgb(130, 224, 255); border: none; }
     #message-container {height: 96.5%; overflow-y: auto;}
     #messages { list-style-type: none; margin: 0; padding: 0; }
@@ -47,6 +50,10 @@
     </div>
     
     <button id='toggle-mute'>Turn Sound Off</button>
+    <button id='change-username'>Change Username</button>
+    <form class="hidden" id="change-username-form">
+      <input id="change-username-form-input" type="text" />
+    </form>
     
     <!-- action="#" prevents page from refreshing (after first submission) on form submission if for some reason ev.preventDefault(); doesn't work. -->
     <form id="chat-form" action="#">
