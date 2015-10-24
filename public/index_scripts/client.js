@@ -107,7 +107,9 @@ function loadUsername() {
     var name = keyValuePairs[i].substring(0, keyValuePairs[i].indexOf('='));
     var value = keyValuePairs[i].substring(keyValuePairs[i].indexOf('=')+1);
     if (name && name === 'username') {
-      socket.emit('username submit', value);
+      // decodeURI undoes cookies automatic encoding of special characters to URL codes. This allows the original characters to be usd as the username and 
+      // will thus let usernames be executed as HTML. 
+      socket.emit('username submit', decodeURI(value));
     }
   }
 };
