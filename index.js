@@ -95,16 +95,11 @@ function handleClientConnects() {
     
     
     // Does stuff when client sends a 'chat message' event to the server
-    var qualifiedUserText;
+    var qualifiedUserText = socket.handshake.address + " ";
     socket.on('chat message', function(msg) {
        var date = new Date();
-      if (userName) {
-        qualifiedUserText = userName + " ";
-      } else {
-        qualifiedUserText = socket.handshake.address + " ";
-      };
       console.log(qualifiedUserText + 'says: ' + msg);
-      filesys.appendFile(__dirname + '/log/log.txt', qualifiedUserText + 'on '+ date + ' says: ' + msg + nL, function(err) {
+      filesys.appendFile(__dirname + '/log/log.txt', socket.handshake.address +' AKA: '+ userName + 'on '+ date + ' says: ' + msg + nL, function(err) {
          if (err) throw err;
       });
       
@@ -123,6 +118,9 @@ function handleClientConnects() {
     
     socket.on('username submit', function(name) {
       userName = name;
+      qualifiedUserText = userName + ' ';
+      // Note that if client loses connnection and reconnects it is not automatically set to resubmit its username which it will need to do to have its name.
+      // Right now if that happened the user would need to refresh or manually re-enter their username to submt it.
       /* Will need to prevent users from entering names that create new lines in text document. Perhaps convert their names to hexadecimal.
       filesys.appendFile(__dirname + '/users/usernames.txt', userName + nL, function(err) {
          if (err) throw err;

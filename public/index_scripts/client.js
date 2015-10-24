@@ -100,6 +100,8 @@ function handleMuteToggle(buttonId) {
   }
 }
 
+// Note that if client loses connnection and reconnects it is not automatically set to resubmit its username which it will need to do to have its name.
+// Right now if that happened the user would need to refresh or manually re-enter their username to submit it.
 function loadUsername() {
   var button = document.getElementById('username');
   var keyValuePairs = document.cookie.split(/; */);
