@@ -110,7 +110,7 @@ function handleClientConnects() {
          if (err) throw err;
       });
       
-
+      // handles posting of messages and some server commands, often ones that need to be hidden from the client code to keep them secret.
       if (msg != configTxt['content']) {
         // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
         socket.broadcast.emit('chat message', qualifiedUserText + 'says: ' + msg);
@@ -129,14 +129,23 @@ function handleClientConnects() {
       qualifiedUserText = userName + ' ';
       console.log(uriName);
       // Perhaps convert their names to hexadecimal.
-        filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
-          if (err && err.code == 'EEXIST') {
-            // do nothing
-          } else if (err && err.code == 'ENOENT') {
-            socket.emit('chat message', '<strong>Your username is too long. You\'ll be able to use it in chat, but it won\'t work with the mail system.</strong>')
-          };
-        });
+      filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
+        if (err && err.code == 'EEXIST') {
+          // do nothing
+        } else if (err && err.code == 'ENOENT') {
+          socket.emit('chat message', '<strong>Your username is too long. You\'ll be able to use it in chat, but it won\'t work with the mail system.</strong>')
+        };
+      });
     });
+    
+    //handles sending message
+    socket.on('send mail', function(recipientName, content) {
+      filesys.readdir(__dirname + '/users/' + recipientName, function (err, files) {
+        if (err) throw err
+        console.log(files);
+      });
+    });
+    
 
   });
   
