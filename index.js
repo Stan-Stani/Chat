@@ -23,7 +23,7 @@ var nL = require('os').EOL;
 startServingContent();
 handleClientConnects();
 handleServerShutdown();
-handleServerError();
+//handleServerError();
 // ! End of Central Function Calls Section !
 
 // ! Central Functions' Definitions Section !
@@ -125,11 +125,17 @@ function handleClientConnects() {
     
     socket.on('username submit', function(name) {
       userName = name;
+      uriName = encodeURIComponent(userName);
       qualifiedUserText = userName + ' ';
-      /* Will need to prevent users from entering names that create new lines in text document. Perhaps convert their names to hexadecimal.
-      filesys.appendFile(__dirname + '/users/usernames.txt', userName + nL, function(err) {
-         if (err) throw err;
-      });*/
+      console.log(uriName);
+      // Perhaps convert their names to hexadecimal.
+        filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
+          if (err && err.code == 'EEXIST') {
+            // do nothing
+          } else if (err && err.code == 'ENOENT') {
+            socket.emit('chat message', '<strong>Your username is too long. You\'ll be able to use it in chat, but it won\'t work with the mail system.</strong>')
+          };
+        });
     });
 
   });
@@ -146,7 +152,6 @@ function handleClientConnects() {
     io.emit('chat message', textToRegister);
     console.log(textToRegister);
     filesys.appendFile(__dirname + '/log/log.txt', textToRegister + nL, function(err) {
-      if (err) throw err;
     });
   };
 };
