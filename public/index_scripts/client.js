@@ -4,8 +4,10 @@
 // Establishes connection to Server (defaults to connecting to host that served page so no URL required in argument)
 var socket = io();
 
-chatForm = document.getElementById("chat-form");
-chatFormInput = document.getElementById("chat-form-input");
+var chatForm = document.getElementById("chat-form");
+var chatFormInput = document.getElementById("chat-form-input");
+var current_client_saved_username;
+
 
 
 // ! Global Objects Section !
@@ -101,6 +103,7 @@ function handleMuteToggle(buttonId) {
 }
 
 // Note that if client loses connnection and reconnects it is not automatically set to resubmit its username which it will need to do to have its name.
+// ^ That has been hack/fixed but will need refactoring.
 // Right now if that happened the user would need to refresh or manually re-enter their username to submit it.
 function loadUsername() {
   var button = document.getElementById('username');
@@ -112,10 +115,13 @@ function loadUsername() {
       // decodeURI undoes cookies automatic encoding of special characters to URL codes. This allows the original characters to be usd as the username and 
       // will thus let usernames be executed as HTML. 
       socket.emit('username submit', decodeURI(value));
+      // allows username submission on reconnect.
+      current_client_saved_username = decodeURI(value);
     }
   }
 };
 
+// This should probably be moved to handleServerEmits
 function handleSetUsername() {
   var button = document.getElementById('change-username');
   var form = document.getElementById('change-username-form');
@@ -133,6 +139,8 @@ function handleSetUsername() {
         
     } else if (buttonState === 'changing') {
       socket.emit('username submit', input.value);
+      // So username can be resubmitted on reconnect. Will need refactoring.
+      current_client_saved_username = input.value;
       input.blur();
       form.classList.toggle('hidden');
       button.innerHTML = 'Change Username';
@@ -150,6 +158,8 @@ function handleSetUsername() {
         // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
         ev.preventDefault();
         socket.emit('username submit', input.value);
+        // see above
+        current_client_saved_username = input.value;
         input.blur();
         form.classList.toggle('hidden');
         button.innerHTML = 'Change Username';
@@ -211,6 +221,13 @@ function handleServerEmits() {
   // Makes everyone's computers focus on the tab and page, even if they're in another program and fullscreened. Use sparingly. (Only tested in Windows.)
   socket.on('fixate', function() {
     alert("Yo, I'm tawkin to yeh!");
+  });
+  
+  socket.on('reconnect', function() {
+    console.log(current_client_saved_username);
+    if (current_client_saved_username) {
+      socket.emit('username submit', current_client_saved_username);
+    }
   });
   
   alertConnectionChanges();

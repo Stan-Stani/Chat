@@ -54,17 +54,15 @@ function handleClientConnects() {
   // Event listener, runs  callback function on a client (socket) connnection event that handles/takes care of this specific client connection
   io.on('connection', function(socket){
     
-      var userName;
+      // Default username
+      var userName = socket.handshake.address;
       
     //console.log(io.engine.clientsCount);
 
     registerClientConnect();
     setTimeout(function () {
-      if (userName) {
-        io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
-      } else {
-        io.emit('chat message', socket.handshake.address + ' username currently undefined');
-      }
+
+    io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
     }, 500);
     
     // Tells all clients, the console, and the log that this client (socket) has connected
@@ -128,21 +126,37 @@ function handleClientConnects() {
       uriName = encodeURIComponent(userName);
       qualifiedUserText = userName + ' ';
       console.log(uriName);
+      var user_folder_exists = true;
       // Perhaps convert their names to hexadecimal.
       filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
         if (err && err.code == 'EEXIST') {
           // do nothing
         } else if (err && err.code == 'ENOENT') {
-          socket.emit('chat message', '<strong>Your username is too long. You\'ll be able to use it in chat, but it won\'t work with the mail system.</strong>')
+          socket.emit('chat message', '<strong>Server says: Your username is too long. You\'ll be able to use it in chat, but it won\'t work with the mail system.</strong>')
+          user_folder_exists = false;
         };
       });
+      
+      if (user_folder_exists === true) {
+        filesys.mkdir(__dirname + '/users/' + uriName + '/' + 'inbox', function(err) {
+          if (err && err.code == 'EEXIST') {
+            // do nothing
+          } 
+        });
+      }
     });
+      
     
     //handles sending message
     socket.on('send mail', function(recipientName, content) {
-      filesys.readdir(__dirname + '/users/' + recipientName, function (err, files) {
-        if (err) throw err
-        console.log(files);
+      uriRecipientName = encodeURIComponent(recipientName);
+      filesys.writeFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.txt', content, function (err) {
+        if (err && err.code === 'ENOENT') {
+          socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>');
+        } 
+        else if (err) throw err
+        else {
+        }
       });
     });
     
