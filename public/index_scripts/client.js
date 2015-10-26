@@ -292,14 +292,16 @@ function handleClientEmits() {
     var inputValue = chatFormInput.value;
     // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
     ev.preventDefault();
-    var first12Characters = inputValue.substring(0, 12);
+    var first7Characters = inputValue.substring(0, 7);
+    console.log('input');
+    console.log(inputValue);
     if (inputValue === '![mail]') {
       socket.emit('read mail');
       console.log('reading mail');
-    } else if (first12Characters ==='![mail-send]') {
+    } else if (first7Characters ==='![mail]') {
 
         // Start extraction at 13th character (index 12)
-        var potentialLastTwoArguments = inputValue.substring(12);
+        var potentialLastTwoArguments = inputValue.substring(7);
 
         var openBracketIndices = getAllIndexes(potentialLastTwoArguments, '[');
         var closeBracketIndices = getAllIndexes(potentialLastTwoArguments, ']');
@@ -438,7 +440,6 @@ function setCookie(name, value, expDate) {
 function alertClient(msg) {
   messages.innerHTML += '<li>' + msg + '</li>'
   scrollMessagesDown();
-  console.log('hello');
 };
 
 // alertClient() might need a rename, and when I refactor I need to remove the scrollMessagesDown()s that are outside of the alertClients.
