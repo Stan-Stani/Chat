@@ -437,9 +437,11 @@ function setCookie(name, value, expDate) {
 
 function alertClient(msg) {
   messages.innerHTML += '<li>' + msg + '</li>'
+  scrollMessagesDown();
+  console.log('hello');
 };
 
-// Consider placing inside alertClient and only use alertClient() to write to messages. alertClient() might need a rename if we do that
+// alertClient() might need a rename, and when I refactor I need to remove the scrollMessagesDown()s that are outside of the alertClients.
 function scrollMessagesDown() {
   var objDiv = document.getElementById('message-container');
   objDiv.scrollTop = objDiv.scrollHeight;
