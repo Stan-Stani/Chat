@@ -172,6 +172,8 @@ function handleClientConnects() {
         // Not sure why 'ENOENT' doesn't happen when the directory doesn't exist. See below for work around.
         if (err && err.code === 'ENOENT') {
           socket.emit('chat message', '<strong>Server says: Your name doesn\'t work with the mail system. Try a shorter one.</strong>');
+        } else if (err && err.code === 'ENAMETOOLONG') {
+          socket.emit('chat message', '<strong>Server says: Your name doesn\'t work with the mail system. Try a shorter one.</strong>');
         } else if (err) {
           throw err
           // Catches error if directory doesn't exist.
