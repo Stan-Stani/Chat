@@ -56,6 +56,7 @@ function handleClientConnects() {
     
       // Default username
       var userName = socket.handshake.address;
+      var uriName = encodeURIComponent(userName);
       
     //console.log(io.engine.clientsCount);
 
@@ -123,7 +124,7 @@ function handleClientConnects() {
     
     socket.on('username submit', function(name) {
       userName = name;
-      uriName = encodeURIComponent(userName);
+      uriName = encodeURIComponent(name);
       qualifiedUserText = userName + ' ';
       console.log(uriName);
       var user_folder_exists = true;
@@ -143,6 +144,7 @@ function handleClientConnects() {
             // do nothing
           } 
         });
+        socket.emit('chat message', '<strong>Server says: Username set. Please note that currently your name may not work with the mail system if it has periods in it.</strong>');
       }
     });
       
@@ -150,12 +152,58 @@ function handleClientConnects() {
     //handles sending message
     socket.on('send mail', function(recipientName, content) {
       uriRecipientName = encodeURIComponent(recipientName);
-      filesys.writeFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.txt', content, function (err) {
+      filesys.appendFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.txt', '<strong><u><h4>Message on ' + new Date + ':</h4></u></strong><p style="text-indent: 1em;">' + content + '</p>', function (err) {
         if (err && err.code === 'ENOENT') {
           socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>');
-        } 
-        else if (err) throw err
+        } else if (err) throw err
         else {
+          socket.emit('chat message', '<strong>Server says: Message sent.</strong>');
+        }
+      });
+    });
+    
+    socket.on('read mail', function() {
+      console.log('hello');
+      console.log(userName);
+      console.log(uriName);
+      filesys.readdir(__dirname + '/users/' + uriName + '/inbox/', function(err, list) {
+        console.log(list);
+        // This error handling doesn't work.
+        // Not sure why 'ENOENT' doesn't happen when the directory doesn't exist. See below for work around.
+        if (err && err.code === 'ENOENT') {
+          socket.emit('chat message', '<strong>Server says: Your name doesn\'t work with the mail system. Try a shorter one.</strong>');
+        } else if (err) {
+          throw err
+          // Catches error if directory doesn't exist.
+        } else if (list.length !== undefined) {
+          
+        
+          if (list.length !== 0) {
+            // won't return full name if there is a period in the file name so it doesn't work if there is a period in addition to the extension.
+            for (var i = 0; i < list.length; i++) {
+              readFileAndCaptureI(i, list);
+
+            }
+            function readFileAndCaptureI (iterator, list) {
+              filesys.readFile(__dirname + '/users/' + uriName + '/inbox/' + list[iterator], function(err, content) {
+                if (err && err.code === 'ENOENT') {
+                  socket.emit('chat message', '<strong>Server says: Couldn\'t return user message because their name contains a period</strong>')
+                } 
+                else if (err) throw err
+                else {
+                  console.log('here');
+                  // Get rid of the '.txt'
+                  var fromUser = (list[iterator]).substring(0, (list[iterator].length - 4));
+                  socket.emit('chat message', '<strong><h1 style="padding: 0px; margin: 0px;">From: ' + fromUser + '</h1></strong><br>' + content)
+                }
+              });
+            }
+          } else {
+            socket.emit('chat message', '<strong>Server says: No mail in inbox.</strong>');
+          }
+            
+        } else {
+          socket.emit('chat message', '<strong>Server says: Your name doesn\'t work with the mail system. Try a shorter one.</strong>');
         }
       });
     });

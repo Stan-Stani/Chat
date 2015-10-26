@@ -292,112 +292,112 @@ function handleClientEmits() {
     var inputValue = chatFormInput.value;
     // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
     ev.preventDefault();
-    var firstSevenCharacters;
+    var first12Characters = inputValue.substring(0, 12);
     if (inputValue === '![mail]') {
-      socket.emit('view mail');
-    } else {
-      firstSevenCharacters = inputValue.substring(0, 7);
-    }
-    
-    if (firstSevenCharacters === '![mail]') {
-      var potentialLastTwoArguments = inputValue.substring(7);
-      var openBracketIndices = getAllIndexes(potentialLastTwoArguments, '[');
-      var closeBracketIndices = getAllIndexes(potentialLastTwoArguments, ']');
-      var allBracketIndices = openBracketIndices.concat(closeBracketIndices);
-      var escapedOpenBracketEscapeIndices = getAllIndexesForString(potentialLastTwoArguments, /\\\[/g);
-      var escapedCloseBracketEscapeIndices = getAllIndexesForString(potentialLastTwoArguments, /\\]/g);
-      var allEscapedBracketEscapeIndices = escapedOpenBracketEscapeIndices.concat(escapedCloseBracketEscapeIndices);
-      allEscapedBracketEscapeIndices = allEscapedBracketEscapeIndices.sort(function(a,b){ return a - b; });
-      var allEscapedBracketBracketIndices = [];
-      var allUnescapedBracketIndices = [];
-      // Count one up from each escape index that is escaping a bracket to get the index of the escaped bracket.
-      for (var i = 0; i < allEscapedBracketEscapeIndices.length; i++) {
-        allEscapedBracketBracketIndices[i] = allEscapedBracketEscapeIndices[i] + 1
-      }
-      // let's look at all brackets
-      for (var i = 0; i < allBracketIndices.length; i++) {
-        // if the bracket we are looking at is not escaped
-        if (potentialLastTwoArguments[allBracketIndices[i] - 1] !== '\\') {
-          // add that bracket's index to the allUnescapedBracketIndices array
-          //works correctly
-          allUnescapedBracketIndices.push(allBracketIndices[i]);
-        }
-      }
+      socket.emit('read mail');
+      console.log('reading mail');
+    } else if (first12Characters ==='![mail-send]') {
 
-      if (allUnescapedBracketIndices.length > 4) {
-        alertClient('<strong>Invalid syntax: Too many square brackets. Don\'t forget to escape (place \\ directly before) all the square brackets you want to be included in the recipient and message arguments.</strong>');
-      } else if (allUnescapedBracketIndices.length < 4) {
-        alertClient('<strong>Invalid syntax: Not enough brackets. Did you accidentally escape (place \\ directly before) more than 4 brackets?</strong>');
-        // else the number of unescaped brackets must be 4, so...
-      } else { 
-        var wellFormedUnescapedBracketArray = ['[', ']', '[', ']'];
-        // let's use each unescaped bracket index
-        var failed = false;
-        // ascending order
-        allUnescapedBracketIndices = allUnescapedBracketIndices.sort(function(a,b){ return a - b; });
-        for (var i = 0; i < allUnescapedBracketIndices.length; i++) {
-          // if the unescaped bracket we are looking at DOES NOT correspond to the well formed model
-          if (potentialLastTwoArguments[allUnescapedBracketIndices[i]] !== wellFormedUnescapedBracketArray[i]) {
-            alertClient('<strong>Invalid syntax: Your argument brackets aren\'t all facing their partners. They should look like this: ![mail][recipient name][message content]</strong>');
-            failed = true;
-            break;
+        // Start extraction at 13th character (index 12)
+        var potentialLastTwoArguments = inputValue.substring(12);
+
+        var openBracketIndices = getAllIndexes(potentialLastTwoArguments, '[');
+        var closeBracketIndices = getAllIndexes(potentialLastTwoArguments, ']');
+        var allBracketIndices = openBracketIndices.concat(closeBracketIndices);
+        var escapedOpenBracketEscapeIndices = getAllIndexesForString(potentialLastTwoArguments, /\\\[/g);
+        var escapedCloseBracketEscapeIndices = getAllIndexesForString(potentialLastTwoArguments, /\\]/g);
+        var allEscapedBracketEscapeIndices = escapedOpenBracketEscapeIndices.concat(escapedCloseBracketEscapeIndices);
+        allEscapedBracketEscapeIndices = allEscapedBracketEscapeIndices.sort(function(a,b){ return a - b; });
+        var allEscapedBracketBracketIndices = [];
+        var allUnescapedBracketIndices = [];
+        // Count one up from each escape index that is escaping a bracket to get the index of the escaped bracket.
+        for (var i = 0; i < allEscapedBracketEscapeIndices.length; i++) {
+          allEscapedBracketBracketIndices[i] = allEscapedBracketEscapeIndices[i] + 1
+        }
+        // let's look at all brackets
+        for (var i = 0; i < allBracketIndices.length; i++) {
+          // if the bracket we are looking at is not escaped
+          if (potentialLastTwoArguments[allBracketIndices[i] - 1] !== '\\') {
+            // add that bracket's index to the allUnescapedBracketIndices array
+            //works correctly
+            allUnescapedBracketIndices.push(allBracketIndices[i]);
           }
         }
-          // if we get to here, the argument brackets are (FINALLY!) known to be correctly formatted and thus syntatically unambiguous.
-        if (!failed) {
 
-          if (potentialLastTwoArguments.substring(allUnescapedBracketIndices[1] + 1, allUnescapedBracketIndices[2]) !== '') {
-            alertClient('<strong>Warning: You placed text between the recipient and content arguments. There\'s no reason to do that! It will be ignored.</strong>');
+        if (allUnescapedBracketIndices.length > 4) {
+          alertClient('<strong>Invalid syntax: Too many square brackets. Don\'t forget to escape (place \\ directly before) all the square brackets you want to be included in the recipient and message arguments.</strong>');
+        } else if (allUnescapedBracketIndices.length < 4) {
+          alertClient('<strong>Invalid syntax: Not enough brackets. Did you accidentally escape (place \\ directly before) more than 4 brackets?</strong>');
+          // else the number of unescaped brackets must be 4, so...
+        } else { 
+          var wellFormedUnescapedBracketArray = ['[', ']', '[', ']'];
+          // let's use each unescaped bracket index
+          var failed = false;
+          // ascending order
+          allUnescapedBracketIndices = allUnescapedBracketIndices.sort(function(a,b){ return a - b; });
+          for (var i = 0; i < allUnescapedBracketIndices.length; i++) {
+            // if the unescaped bracket we are looking at DOES NOT correspond to the well formed model
+            if (potentialLastTwoArguments[allUnescapedBracketIndices[i]] !== wellFormedUnescapedBracketArray[i]) {
+              alertClient('<strong>Invalid syntax: Your argument brackets aren\'t all facing their partners. They should look like this: ![mail][recipient name][message content]</strong>');
+              failed = true;
+              break;
+            }
+          }
+            // if we get to here, the argument brackets are (FINALLY!) known to be correctly formatted and thus syntatically unambiguous.
+          if (!failed) {
+
+            if (potentialLastTwoArguments.substring(allUnescapedBracketIndices[1] + 1, allUnescapedBracketIndices[2]) !== '') {
+              alertClient('<strong>Warning: You placed text between the recipient and content arguments. There\'s no reason to do that! It will be ignored.</strong>');
+            }
+
+            var wellFormedLastTwoArguments = potentialLastTwoArguments;
+            allEscapedBracketEscapeIndices = allEscapedBracketEscapeIndices.sort(function(a,b){ return a - b; });
+            var recipientWithEscapes = wellFormedLastTwoArguments.slice(0, allUnescapedBracketIndices[1] + 1);
+            var recipientWithEscapesOpenBracketEscapeIndices = getAllIndexesForString(recipientWithEscapes, /\\\[/g); 
+            var recipientWithEscapesCloseBracketEscapeIndices = getAllIndexesForString(recipientWithEscapes, /\\]/g);
+            var recipientWithEscapesAllBracketEscapeIndices = recipientWithEscapesOpenBracketEscapeIndices.concat(recipientWithEscapesCloseBracketEscapeIndices);
+            recipientWithEscapesAllBracketEscapeIndices = recipientWithEscapesAllBracketEscapeIndices.sort(function(a,b){ return a - b; });
+
+            console.log(recipientWithEscapesAllBracketEscapeIndices);
+            var contentWithEscapes = wellFormedLastTwoArguments.slice(allUnescapedBracketIndices[2], allUnescapedBracketIndices[3] + 1);
+            var contentWithEscapesOpenBracketEscapeIndices = getAllIndexesForString(contentWithEscapes, /\\\[/g); 
+            var contentWithEscapesCloseBracketEscapeIndices = getAllIndexesForString(contentWithEscapes, /\\]/g);
+            var contentWithEscapesAllBracketEscapeIndices = contentWithEscapesOpenBracketEscapeIndices.concat(contentWithEscapesCloseBracketEscapeIndices);
+            contentWithEscapesAllBracketEscapeIndices = contentWithEscapesAllBracketEscapeIndices.sort(function(a,b){ return a - b; });
+            console.log(contentWithEscapesAllBracketEscapeIndices)
+
+            // Remove the escape symbol.
+            var recipientLeft, recipientRight, formattedRecipient = recipientWithEscapes;
+            for (var i = recipientWithEscapesAllBracketEscapeIndices.length - 1; i >= 0; i--) {
+              recipientLeft = formattedRecipient.slice(0, recipientWithEscapesAllBracketEscapeIndices[i]);
+              recipientRight = formattedRecipient.slice(recipientWithEscapesAllBracketEscapeIndices[i] + 1, recipientWithEscapes.length);
+              formattedRecipient = recipientLeft + recipientRight;
+            }
+            // remove the argument brackets
+            formattedRecipient = formattedRecipient.substring(1,formattedRecipient.length - 1);
+
+            var contentLeft, contentRight, formattedContent = contentWithEscapes;
+            for (var i = contentWithEscapesAllBracketEscapeIndices.length - 1; i >= 0; i--) {
+              contentLeft = formattedContent.slice(0, contentWithEscapesAllBracketEscapeIndices[i]);
+              console.log(contentLeft);
+              contentRight = formattedContent.slice(contentWithEscapesAllBracketEscapeIndices[i] + 1, contentWithEscapes.length);
+              console.log(contentRight);
+              formattedContent = contentLeft + contentRight;
+            }
+            formattedContent = formattedContent.substring(1, formattedContent.length - 1);
+
+            // ET ENFIN !
+            socket.emit('send mail', formattedRecipient, formattedContent);
+
+
           }
 
-          var wellFormedLastTwoArguments = potentialLastTwoArguments;
-          allEscapedBracketEscapeIndices = allEscapedBracketEscapeIndices.sort(function(a,b){ return a - b; });
-          var recipientWithEscapes = wellFormedLastTwoArguments.slice(0, allUnescapedBracketIndices[1] + 1);
-          var recipientWithEscapesOpenBracketEscapeIndices = getAllIndexesForString(recipientWithEscapes, /\\\[/g); 
-          var recipientWithEscapesCloseBracketEscapeIndices = getAllIndexesForString(recipientWithEscapes, /\\]/g);
-          var recipientWithEscapesAllBracketEscapeIndices = recipientWithEscapesOpenBracketEscapeIndices.concat(recipientWithEscapesCloseBracketEscapeIndices);
-          recipientWithEscapesAllBracketEscapeIndices = recipientWithEscapesAllBracketEscapeIndices.sort(function(a,b){ return a - b; });
 
-          console.log(recipientWithEscapesAllBracketEscapeIndices);
-          var contentWithEscapes = wellFormedLastTwoArguments.slice(allUnescapedBracketIndices[2], allUnescapedBracketIndices[3] + 1);
-          var contentWithEscapesOpenBracketEscapeIndices = getAllIndexesForString(contentWithEscapes, /\\\[/g); 
-          var contentWithEscapesCloseBracketEscapeIndices = getAllIndexesForString(contentWithEscapes, /\\]/g);
-          var contentWithEscapesAllBracketEscapeIndices = contentWithEscapesOpenBracketEscapeIndices.concat(contentWithEscapesCloseBracketEscapeIndices);
-          contentWithEscapesAllBracketEscapeIndices = contentWithEscapesAllBracketEscapeIndices.sort(function(a,b){ return a - b; });
-          console.log(contentWithEscapesAllBracketEscapeIndices)
-
-          // Remove the escape symbol.
-          var recipientLeft, recipientRight, formattedRecipient = recipientWithEscapes;
-          for (var i = recipientWithEscapesAllBracketEscapeIndices.length - 1; i >= 0; i--) {
-            recipientLeft = formattedRecipient.slice(0, recipientWithEscapesAllBracketEscapeIndices[i]);
-            recipientRight = formattedRecipient.slice(recipientWithEscapesAllBracketEscapeIndices[i] + 1, recipientWithEscapes.length);
-            formattedRecipient = recipientLeft + recipientRight;
-          }
-          // remove the argument brackets
-          formattedRecipient = formattedRecipient.substring(1,formattedRecipient.length - 1);
-
-          var contentLeft, contentRight, formattedContent = contentWithEscapes;
-          for (var i = contentWithEscapesAllBracketEscapeIndices.length - 1; i >= 0; i--) {
-            contentLeft = formattedContent.slice(0, contentWithEscapesAllBracketEscapeIndices[i]);
-            console.log(contentLeft);
-            contentRight = formattedContent.slice(contentWithEscapesAllBracketEscapeIndices[i] + 1, contentWithEscapes.length);
-            console.log(contentRight);
-            formattedContent = contentLeft + contentRight;
-          }
-          formattedContent = formattedContent.substring(1, formattedContent.length - 1);
-          
-          // ET ENFIN !
-          socket.emit('send mail', formattedRecipient, formattedContent);
-          
-          
         }
-        
-        
-      }
       
-    } else {
-      socket.emit('chat message', inputValue);
-    }
+      } else {
+        socket.emit('chat message', inputValue);
+      }
     chatFormInput.value = "";
   });
 };
