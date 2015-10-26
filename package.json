@@ -1,6 +1,6 @@
 {
   "name": "chat",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "chat app built with node.js, socket.io, and express",
   "dependencies": {
     "express": "^4.13.3",

@@ -20,6 +20,7 @@
     }
     .hidden {visibility: hidden;}
     #change-username-form {position: fixed; top: 12.5px; right: 260px;}
+    #info {background-color: #333; padding: 3px; position: fixed; top: 45px; right: 10px; width: 50px; color: white;}
     #change-username {background-color: #333; padding: 3px; position: fixed; top: 10px; right: 120px; width: 130px; color: white;}
     #toggle-mute {background-color: #333; padding: 3px; position: fixed; top: 10px; right: 10px; width: 100px; color: white;}
     #hover-page {right:0px; position:fixed; height: 400px; width: 500px;}
@@ -51,6 +52,7 @@
     
     <button id='toggle-mute'>Turn Sound Off</button>
     <button id='change-username'>Change Username</button>
+    <button id="info" onclick="window.open('subpages/info.html')">Info</button>
     <form class="hidden" id="change-username-form">
       <input id="change-username-form-input" type="text" />
     </form>
