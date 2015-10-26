@@ -155,6 +155,8 @@ function handleClientConnects() {
       filesys.appendFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.txt', '<strong><u><h4>Message on ' + new Date + ':</h4></u></strong><p style="text-indent: 1em;">' + content + '</p>', function (err) {
         if (err && err.code === 'ENOENT') {
           socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>');
+        } else if (err && err.code === 'ENAMETOOLONG') {
+          socket.emit('chat message', '<strong>Server says: Your name doesn\'t work with the mail system. Try a shorter one.</strong>');
         } else if (err) throw err
         else {
           socket.emit('chat message', '<strong>Server says: Message sent.</strong>');
