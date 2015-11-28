@@ -2,13 +2,27 @@
 <html>
   <head>
     <title>Info</title>
+    <style>
+      .indent {
+        margin-left: 1em;
+      }
+      
+      .indent2 {
+        margin-left: 4em;
+      }
+    </style>
   </head>
-  <body style="background-color: #215252; color: #afa55a; font-family: monospace; font-size: 3em;">
+  <body style="background-color: #215252; color: #afa55a; font-family: monospace; font-size: 2.5em;">
     <h1><u>info</u></h1>
-    <p style="text-indent: 1em;">Type ![mail][recipient][message] to send mail to a user's inbox.</p>
-    <p style="text-indent: 1em;">Type ![mail] to check your inbox.</p>
-    <br>
-    <br>
-    <p style="padding-right: 1em; padding-left: 3em">Note that anyone can access your inbox and use your username at any time!</p>
+    <h3>mail system</h3>
+    <p class="indent">Type ![mail][recipient][message] to send mail to a user's inbox.</p>
+    <p class="indent">Type ![mail] to check your inbox.</p>
+    <p class="indent2">Note that anyone can access your inbox and use your username at any time!</p>
+    <h3>https</h3>
+    <p class="indent">Click <a id="https-chat">here</a> to visit a (hopefully) more secure version of Chat</p>
+    <p class="indent2">Note that your browser will probably say the site you are visiting is unsecure, but that is because Chat is not using a verified SSL cerfiticate. The connection will still be encrypted and more secure than if you were not using https. Browsers just like to complain when the SSL certificate is not verified. In the worst case scenario, it should not be any less secure than the connection protocol (http) you use by default when connecting to Chat.</p>
+    <script>
+      document.getElementById('https-chat').setAttribute('href', 'https://' + window.location.host);
+    </script>
   </body>
 </html>

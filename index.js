@@ -4,15 +4,36 @@
 var express = require('express');
 var app = express();
 
+var filesys = require('fs');
+
 // wraps http server in socket.io ?
 var http = require('http').Server(app);
+
+var options = {
+  key: filesys.readFileSync('auth/key.pem'),
+  cert: filesys.readFileSync('auth/cert.pem')
+};
+
+var https = require('https').Server(options, app);
+
+
+
+
+
 
 
 // The main idea behind Socket.IO is that you can send and receive any events you want, with any data you want. Any objects that can be encoded as JSON will do, and binary data is supported too.
 // Notice that I initialize a new instance of socket.io by passing the http (the HTTP server) object
-var io = require('socket.io')(http);
+// Used to be:
+// io = require('socket.io')(http);
 
-var filesys = require('fs');
+// But since I'm now using http AND https I don't create a new instance by passing http only, I create the instance and then attach the servers.
+var ioRequire = require('socket.io');
+var io = new ioRequire
+
+io.attach(http);
+io.attach(https);
+
 
 // Sets nL to system specific newline character. In Unix like systems it's "\n" but in Windows it's "\n\r".
 var nL = require('os').EOL;
@@ -41,9 +62,14 @@ function startServingContent() {
   app.use(express.static(__dirname + '/public'));
 
   // Finishes serving initialization by starting server listening
-  var port = 3000;
-  http.listen(port, function(){
-    console.log('listening on ' + port.toString());
+  var httpPort = 80;
+  http.listen(httpPort, function(){
+    console.log('http server listening on ' + httpPort.toString());
+  });
+  
+  var httpsPort = 443;
+  https.listen(httpsPort, function() {
+    console.log('https server listening on ' + httpsPort.toString());
   });
 };
 
