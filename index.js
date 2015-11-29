@@ -295,7 +295,9 @@ function handleClientConnects() {
                   }
                 }
                 
-                lastAsyncCheck();
+                if (!currentFileIsJSON) {
+                  lastAsyncCheck();
+                }
                 asynchsFinished++;
               });
             }
