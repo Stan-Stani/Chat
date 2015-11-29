@@ -178,13 +178,39 @@ function handleClientConnects() {
     //handles sending message
     socket.on('send mail', function(recipientName, content) {
       uriRecipientName = encodeURIComponent(recipientName);
-      filesys.appendFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.txt', '<strong><u><h4>Message on ' + new Date + ':</h4></u></strong><p style="text-indent: 1em;">' + content + '</p>', function (err) {
+      filesys.readFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.json', function (err, data) {
+        // if ENOENT then the user doesn't exist, or hasn't had mail sent to them or their name is incompatible with the message system
         if (err && err.code === 'ENOENT') {
-          socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>');
+          var mailObject = {};
+          mailObject['message1'] = {
+            sender: uriName,
+            date: new Date(),
+            content: content
+          }
+          // Create the mail data file, if that fails then we know the user doesn't exist or the name isn't compatible with the message system
+          filesys.writeFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.json', JSON.stringify(mailObject), function (err) {
+            if (err && err.code === 'ENOENT') {
+              socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>')
+            } else if (err) throw err
+            // The message was sent.
+            else {
+              socket.emit('chat message', '<strong>Server says: Message sent.</strong>');
+            }
+          });
         } else if (err && err.code === 'ENAMETOOLONG') {
           socket.emit('chat message', '<strong>Server says: User either does not exist, or their name is not compatible with the message system because it is too long.</strong>');
         } else if (err) throw err
         else {
+          // Since the user already has messages, let's add this new one to the JSON file.
+          var mailObject = JSON.parse(data);
+          mailObject['message' + (Object.keys(mailObject).length + 1)] = {
+            sender: uriName,
+            date: new Date(),
+            content: content
+          }
+          filesys.writeFile(__dirname + '/users/' + uriRecipientName + '/inbox/' + uriName + '.json', JSON.stringify(mailObject), function (err) {
+            if (err) throw err
+          });
           socket.emit('chat message', '<strong>Server says: Message sent.</strong>');
         }
       });
@@ -195,7 +221,6 @@ function handleClientConnects() {
       console.log(userName);
       console.log(uriName);
       filesys.readdir(__dirname + '/users/' + uriName + '/inbox/', function(err, list) {
-        console.log(list);
         // This error handling doesn't work.
         // Not sure why 'ENOENT' doesn't happen when the directory doesn't exist. See below for work around.
         if (err && err.code === 'ENOENT') {
@@ -209,23 +234,69 @@ function handleClientConnects() {
           
         
           if (list.length !== 0) {
+            var mailObjectsMessagesArray = [];
+            var asynchsFinished = 0;
             // won't return full name if there is a period in the file name so it doesn't work if there is a period in addition to the extension.
             for (var i = 0; i < list.length; i++) {
               readFileAndCaptureI(i, list);
-
             }
+            
+            
             function readFileAndCaptureI (iterator, list) {
-              filesys.readFile(__dirname + '/users/' + uriName + '/inbox/' + list[iterator], function(err, content) {
-                if (err && err.code === 'ENOENT') {
-                  socket.emit('chat message', '<strong>Server says: Couldn\'t return user message because their name contains a period</strong>')
-                } 
-                else if (err) throw err
-                else {
-                  console.log('here');
-                  // Get rid of the '.txt'
-                  var fromUser = (list[iterator]).substring(0, (list[iterator].length - 4));
-                  socket.emit('chat message', '<strong><h1 style="padding: 0px; margin: 0px;">From: ' + fromUser + '</h1></strong><br>' + content)
+              filesys.readFile(__dirname + '/users/' + uriName + '/inbox/' + list[iterator], function(err, fileData) {
+                // Handles older message file format (.txt).
+                // TODO: Get the other messages to display when there is a .txt file. Right now the problem seems to be that return seems to exit out of multiple parent functions instead of just the immediate parent.
+                var currentFileIsJSON = true
+                if (list[iterator].substr(list[iterator].length - 4 ) === '.txt') {
+                  socket.emit('chat message', 'Error: The server has outdated message files. Please notify the adminstrator.');
+                  socket.emit('chat message', 'Here is the outdated file: ' + fileData);
+                  console.log(uriName + ' has outdated message files.');
+                  currentFileIsJSON = false;
                 }
+                if (currentFileIsJSON === true) {
+                  if (err && err.code === 'ENOENT') {
+                    socket.emit('chat message', '<strong>Server says: Couldn\'t return user message because their name contains a period</strong>')
+                  } 
+                  else if (err) throw err
+                  else {
+                    var mailObject = JSON.parse(fileData);
+                    // add mailObject messages to mailObjectsMessagesArray
+                    for (var key in mailObject) {
+                      if (mailObject.hasOwnProperty(key)) {
+                        mailObjectsMessagesArray.push(mailObject[key]);
+                      }
+                    }
+                    
+                    lastAsyncCheck();
+                    
+                    function lastAsyncCheck() {
+                      console.log(iterator + '' + (list.length - 1) + '' + asynchsFinished);
+                      // if this is the last asynch executing and all the other asynchs have finished executing
+                      if ((list.length - 1) === (asynchsFinished)) {
+                        mailObjectsMessagesArray.sort(compare);
+                        for (var i = 0; i < mailObjectsMessagesArray.length; i++) {
+
+                          // new Date converts json auto-formatted utc date string back to local (i.e. server) time
+                          socket.emit('chat message', '<strong><h1 style="padding: 0px; margin: 0px;">From: ' + mailObjectsMessagesArray[i].sender + '</h1></strong><br>' + '<strong><u><h4>Message on ' + new Date (mailObjectsMessagesArray[i].date) + ':</h4></u></strong><p style="text-indent: 1em;">' + mailObjectsMessagesArray[i].content + '</p>');
+                        }
+
+
+                        function compare(a,b) {
+                          if (a.date < b.date)
+                            return -1;
+                          if (a.date > b.date)
+                            return 1;
+                          return 0;
+                        }
+                      }
+                    }
+
+
+                  }
+                }
+                
+                lastAsyncCheck();
+                asynchsFinished++;
               });
             }
           } else {
