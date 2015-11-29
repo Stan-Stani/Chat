@@ -245,11 +245,11 @@ function handleClientConnects() {
             function readFileAndCaptureI (iterator, list) {
               filesys.readFile(__dirname + '/users/' + uriName + '/inbox/' + list[iterator], function(err, fileData) {
                 // Handles older message file format (.txt).
-                // TODO: Get the other messages to display when there is a .txt file. Right now the problem seems to be that return seems to exit out of multiple parent functions instead of just the immediate parent.
+                // TODO: Get the other messages to display when there is a .txt file. Right now the problem seems to be that return seems to exit out of multiple parent functions instead of just the immediate parent. Fix client Change Username too many event listeners bug.
                 var currentFileIsJSON = true
                 if (list[iterator].substr(list[iterator].length - 4 ) === '.txt') {
                   socket.emit('chat message', 'Error: The server has outdated message files. Please notify the adminstrator.');
-                  socket.emit('chat message', 'Here is the outdated file: ' + fileData);
+                  socket.emit('chat message', 'Here is the outdated file from ' + list[iterator].substr(0, list[iterator].length - 4) + ': ' + fileData);
                   console.log(uriName + ' has outdated message files.');
                   currentFileIsJSON = false;
                 }
