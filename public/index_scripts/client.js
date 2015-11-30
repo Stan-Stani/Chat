@@ -130,13 +130,16 @@ function handleSetUsername() {
   button.addEventListener('click', watchButtonAndForm);
   
   function watchButtonAndForm(ev) {
+    // If the user hasn't clicked to start changing user nam
     if (buttonState === 'not changing') {
       buttonState = 'changing';
       button.innerHTML = 'Save Username';
       form.classList.toggle('hidden');
       input.focus();
+      // Start listening for a submit (enter key)
       form.addEventListener('submit', innerWatcher);
-        
+      
+      // If the user chooses to send the info by pressing the "Save Username" button (as opposed to pressing enter).
     } else if (buttonState === 'changing') {
       socket.emit('username submit', input.value);
       // So username can be resubmitted on reconnect. Will need refactoring.
@@ -152,28 +155,39 @@ function handleSetUsername() {
       setCookie('username', input.value, expDate);
       cookiesInfo.printConsoleChange();
       input.value = "";
-      form.addEventListener('submit', innerWatcher);
+      // Stop listening for the enter key because we already sent the data without hearing the user press enter.
+      console.log('innerWatcher should get removed');
+      form.removeEventListener('submit', innerWatcher);
     }
-    function innerWatcher(ev){
-        // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
-        ev.preventDefault();
-        socket.emit('username submit', input.value);
-        // see above
-        current_client_saved_username = input.value;
-        input.blur();
-        form.classList.toggle('hidden');
-        button.innerHTML = 'Change Username';
-        buttonState = 'not changing';
-        var expDate = new Date();
-        var numberOfDaysToAdd = 183;
-        var cookies = document.cookie;
-        expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
-        setCookie('username', input.value, expDate);
-        cookiesInfo.printConsoleChange();
-        input.value = "";
-        form.removeEventListener('submit', innerWatcher);
-      }
+    // innnerWatcher handles submit events (events when the user submits the form by pressing enter).
+    
+    
+    
   };
+  
+  // innerWatcher must be defined out here as opposed to inside watchButtonAndForm because if it were in there every time the Change Username button is clicked innerWatcher would be redefined. If it were redefined every time, the removeEventListener('submit', innerWatcher); in the buttonState === 'changing' conditional would be attempting to remove an event listener with an instance of innerWatcher that has not been added to form, so no event listener would get removed in that case.
+  
+  function innerWatcher(ev){
+      // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
+      ev.preventDefault();
+      console.log(ev);
+      socket.emit('username submit', input.value);
+      // see above
+      current_client_saved_username = input.value;
+      input.blur();
+      form.classList.toggle('hidden');
+      button.innerHTML = 'Change Username';
+      buttonState = 'not changing';
+      var expDate = new Date();
+      var numberOfDaysToAdd = 183;
+      var cookies = document.cookie;
+      expDate.setDate(expDate.getDate() + numberOfDaysToAdd);  
+      setCookie('username', input.value, expDate);
+      cookiesInfo.printConsoleChange();
+      input.value = "";
+      form.removeEventListener('submit', innerWatcher);
+      console.log('submit fired');
+    };
 };
 
 
