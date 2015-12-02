@@ -4,6 +4,10 @@
 var express = require('express');
 var app = express();
 
+var favicon = require('serve-favicon');
+
+app.use(favicon(__dirname + '/public/images/favicon.ico'));
+
 var filesys = require('fs');
 
 // wraps http server in socket.io ?
@@ -60,6 +64,8 @@ function startServingContent() {
   /* sets up static server. Will serve exact paths to assets. Example path: localhost:3000/assets/Yahhoo.wav.
   Without the static server no assets on host machine are accessible by the app. */
   app.use(express.static(__dirname + '/public'));
+  
+
 
   // Finishes serving initialization by starting server listening
   var httpPort = 80;
@@ -72,6 +78,11 @@ function startServingContent() {
     console.log('https server listening on ' + httpsPort.toString());
   });
 };
+
+// 404 Page
+app.use(function(req, res, next) {
+  res.sendFile(__dirname + '/public/404/404.html');
+});
 
 
 
