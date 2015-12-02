@@ -307,6 +307,7 @@ function handleClientEmits() {
     // ev.preventDefault(); prevents form from actually submitting and thus the page from refreshing (but the event listener still fires)
     ev.preventDefault();
     var first7Characters = inputValue.substring(0, 7);
+    var first6Characters = inputValue.substring(0, 6);
     console.log('input');
     console.log(inputValue);
     if (inputValue === '![mail]') {
@@ -411,6 +412,13 @@ function handleClientEmits() {
 
         }
       
+      } else if (first6Characters === '![pop]') {
+        // match '![pop][any-character=except-close-square-bracket-before-end-of-string-and/or-new-line-characters]'
+        var fullMatchedString = inputValue.match(/^!\[pop\]\[.+?\]$/);
+        if (fullMatchedString) {
+          var partialMatchedString = fullMatchedString[0].substring(7, fullMatchedString[0].length - 1);
+          socket.emit('pop message', partialMatchedString);
+        }
       } else {
         socket.emit('chat message', inputValue);
       }
