@@ -87,10 +87,6 @@ function handleClientConnects() {
     //console.log(io.engine.clientsCount);
 
     registerClientConnect();
-    setTimeout(function () {
-
-    io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
-    }, 500);
     
     // Tells all clients, the console, and the log that this client (socket) has connected
     function registerClientConnect() {
@@ -152,7 +148,10 @@ function handleClientConnects() {
       userName = name;
       uriName = encodeURIComponent(name);
       qualifiedUserText = userName + ' ';
-      console.log(uriName);
+      console.log(socket.handshake.address + ' username = ' + '"' + userName + '"');
+      
+      io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
+      
       var user_folder_exists = true;
       // Perhaps convert their names to hexadecimal.
       filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
