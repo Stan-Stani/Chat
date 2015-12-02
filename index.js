@@ -152,6 +152,19 @@ function handleClientConnects() {
       
       io.emit('chat message', socket.handshake.address + ' username = ' + '"' + userName + '"');
       
+      filesys.readFile(__dirname + '/log/connection_log.txt', function(err, data) {
+        if (err && err.code === 'ENOENT') {
+          filesys.writeFile(__dirname + '/log/connection_log.txt', socket.handshake.address + ' username = ' + '"' + userName + '" on ' + new Date + nL, function(err) {
+            if (err) throw err;
+          });
+        } else if (err) throw err;
+        else {
+          filesys.appendFile(__dirname + '/log/connection_log.txt', socket.handshake.address + ' username = ' + '"' + userName + '" on ' + new Date + nL, function(err) {
+            if (err) throw err;
+          });
+        }
+      });
+      
       var user_folder_exists = true;
       // Perhaps convert their names to hexadecimal.
       filesys.mkdir(__dirname + '/users/' + uriName, function(err) {
@@ -313,7 +326,7 @@ function handleClientConnects() {
 
   });
   
-  // This function is used to tell all clients, the console, and the log, the state of the client (as described by a string argument)
+  // This function is used to tell all clients, the console, the log, and the connection log the state of the client (as described by a string argument)
   // E.G. given that stateChangeDescriptor = 'disconnected', this function will cause a printing of '<example ip> disconnected' to
   // all clients, the console, and the log. 
   function registerClientState(socket, stateChangeDescriptor, userName) {
@@ -325,6 +338,19 @@ function handleClientConnects() {
     io.emit('chat message', textToRegister);
     console.log(textToRegister);
     filesys.appendFile(__dirname + '/log/log.txt', textToRegister + nL, function(err) {
+      if (err) throw err;
+    });
+    filesys.readFile(__dirname + '/log/connection_log.txt', function(err, data) {
+      if (err && err.code === 'ENOENT') {
+        filesys.writeFile(__dirname + '/log/connection_log.txt', textToRegister + ' on ' + new Date + nL, function(err) {
+          if (err) throw err;
+        });
+      } else if (err) throw err;
+      else {
+        filesys.appendFile(__dirname + '/log/connection_log.txt', textToRegister + ' on ' + new Date + nL, function(err) {
+          if (err) throw err;
+        });
+      }
     });
   };
 };

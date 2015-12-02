@@ -1,1 +1,1 @@
-**log.txt should automatically get written here when server receives chat messages.*
+**log.txt and connection_log.txt should automatically get written here when server receives chat messages.*
