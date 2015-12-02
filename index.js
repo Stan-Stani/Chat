@@ -122,6 +122,7 @@ function handleClientConnects() {
     readContent(function (err, content, setMe) {setMe['content'] = content; }, configTxt);
     
     
+    
     // Does stuff when client sends a 'chat message' event to the server
     var qualifiedUserText = socket.handshake.address + " ";
     socket.on('chat message', function(msg) {
@@ -132,16 +133,23 @@ function handleClientConnects() {
       });
       
       // handles posting of messages and some server commands, often ones that need to be hidden from the client code to keep them secret.
-      if (msg != configTxt['content']) {
+      var newLineGlobalRegExp = new RegExp(nL, 'g');
+      if (msg === configTxt['content']) {
+        io.emit('fixate');
+      } else if (msg === '![cLog]') {
+        filesys.readFile(__dirname + '/log/connection_log.txt', 'utf8', function(err, data) {
+          if (err) throw err;
+          data = data.replace(newLineGlobalRegExp, '<br>');
+          socket.emit('chat message', '<h1>Connection Log:</h1>' + data);
+        });
+      } else {
         // Emits a 'chat message' event to all clients but the current client (the one that sent the message)
         socket.broadcast.emit('chat message', qualifiedUserText + 'says: ' + msg);
         
         // Emits the client's 'chat message' back to itself but under a new event name so the client knows it is receiving
         // its own message and can then handle it differently from other clients' messages, if necessary.
         socket.emit('own chat message', qualifiedUserText + 'says: ' + msg);
-      } else {
-        io.emit('fixate');
-      };
+      }
     });
     
     socket.on('username submit', function(name) {
@@ -182,7 +190,7 @@ function handleClientConnects() {
             // do nothing
           } 
         });
-        socket.emit('chat message', '<strong>Server says: Username set. Please note that currently your name may not work with the mail system if it has periods in it.</strong>');
+        socket.emit('chat message', '<strong>Server says: Username set. Please note that currently your name will not work with the mail system if it starts with a period.</strong>');
       }
     });
       
