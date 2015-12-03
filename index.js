@@ -163,6 +163,12 @@ function handleClientConnects() {
       }
     });
     
+    socket.on('pop message', function(msg) {
+      io.emit('pop message', msg);
+      io.emit('chat message', '<h3>Pop Message by ' + qualifiedUserText + '</h3>' + msg);
+      console.log('Pop Message by ' + qualifiedUserText + msg);
+    });
+    
     socket.on('username submit', function(name) {
       userName = name;
       uriName = encodeURIComponent(name);

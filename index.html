@@ -32,6 +32,47 @@
     #messages li { padding: 5px 10px; word-wrap: break-word;}
     #messages li:nth-child(odd) { background: #555; }
     #messages li:nth-child(even) { background: #222; }
+    
+    #pop-message-container {
+      position: fixed;
+
+    }
+    
+    .pop-message {
+      background-color: transparent;
+    }
+    
+    .pop-message-content {
+      display: inline-block;
+      border: blue solid 1px;
+    }
+    
+    .pop-message-exit-button {
+      display: inline-block;
+      height: 15px;
+      width: 15px;
+      margin-left: 5px;
+      background-color: red;
+      font-family: monospace;
+      vertical-align: top;
+      text-align: center;
+      float: left;
+    }
+    
+    .pop-message-drag-tab {
+      display: inline-block;
+      height: 140px;
+      width: 1em;
+      background-color: blue;
+      font-family: monospace;
+      vertical-align: top;
+      text-align: center;
+      writing-mode: vertical-lr;
+      word-wrap: break-word;
+      float: left;
+      
+    }
+    
     </style>
   </head>
   <body>
@@ -45,7 +86,9 @@
     <!-- Will work for I.E. but must be hidden off screen and in perhaps a fixed position.
     <embed src="/assets/yahhoo.wav" autostart="true" width="0" height="0" id="wavfile"
     enablejavascript="true"> -->
+    
     <iframe id="hover-page" src="/css_animations" frameborder="0" allowtransparency="true" > </iframe>
+    <div id="pop-message-container"></div>
     <div id='message-container'>
     <ul id="messages"></ul>
     </div>

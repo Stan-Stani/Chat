@@ -215,6 +215,8 @@ function alertClientConnect() {
 
 // Does things based off of the events emitted by the server
 function handleServerEmits() {
+  var popMessageArray = [];
+  var popMessageContainer = document.getElementById('pop-message-container');
   var messages = document.getElementById('messages')
   socket.on('chat message', function(msg){
     messages.innerHTML += '<li>' + msg + '</li>';
@@ -230,6 +232,109 @@ function handleServerEmits() {
   socket.on('own chat message', function(msg){
     alertClient(msg);
     scrollMessagesDown();
+  });
+  
+  socket.on('pop message', function(msg) {
+    var popMessageIdNumber = popMessageArray.length + 1;
+    var popMessage = document.createElement('div');
+    var popMessageContent = document.createElement('div');
+    var popMessageExitButton = document.createElement('div');
+    var popMessageDragTab = document.createElement('div');
+    popMessage.setAttribute('id', 'pop-message-' + popMessageIdNumber);
+    popMessage.className += ' pop-message';
+    // Flex keeps elements on same line even though containing div is of 0 width and height
+    // I.E. 11 super flexbox stuff is super buggy. Todo: fix eventually?
+    popMessage.style.display = 'flex';
+    popMessage.style.position = 'absolute';
+    popMessageContent.innerHTML = msg;
+    popMessageExitButton.innerHTML = 'X';
+    popMessageDragTab.innerHTML = 'Drag&nbsp;Tab';
+    popMessageExitButton.className += ' pop-message-exit-button';
+    popMessageContent.className += ' pop-message-content';
+    popMessageDragTab.className += ' pop-message-drag-tab';
+    popMessage.appendChild(popMessageDragTab);
+    popMessage.appendChild(popMessageContent);
+    popMessage.appendChild(popMessageExitButton);
+    popMessageContainer.appendChild(popMessage);
+    popMessageArray.push(popMessage);
+    
+    handlePopMessageDragging(popMessage);
+    handlePopMessageExit();
+    
+    function handlePopMessageDragging(popMessage) {
+      
+      
+      
+      popMessage.addEventListener('mousedown', followMouseMove);
+      
+      document.body.addEventListener('mouseup', function(ev) {
+        document.body.removeEventListener('mousemove', setDivPosition)
+        
+        // Re-displays the iframes
+        var iframes = document.getElementsByTagName('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+          // Probably not ideal to try to remove this on every mouse up.
+          iframes[i].classList.remove('hidden');
+        }
+      });
+      
+      function followMouseMove(ev) {
+      
+         // Let's the div be dragged anywhere in viewport which isn't possible when iframes are displaying.
+        var iframes = document.getElementsByTagName('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+          iframes[i].classList.toggle('hidden');
+        }
+      
+        
+        // Prevents everything below from being highlightable when the div is click and dragged. (window.event is for older I.E. stuff)
+        ev = ev || window.event;
+        pauseEvent(ev);
+
+        // Setting the popMessageContainer's position to anything other than fixed and height: 100% and width: 100% will probably break the mouse tracking since then 
+        // the div would no longer be lined up with the viewport/page and so its x's and y's wouldn't be either.
+        document.body.addEventListener('mousemove', setDivPosition);
+      }
+
+       
+      function setDivPosition(ev) {
+        var popMessageBounds = popMessage.getBoundingClientRect();
+        
+        // These are for later. Eventually the dragging will work without warping the top left corner to the mouse location when you start to drag it.
+        var popMessageClientXandLeftDiff = (ev.clientX - popMessageBounds['left']);
+        var popMessageClientYandTopDiff = (ev.clientY - popMessageBounds['top']);
+        
+        
+        popMessage.style.left = (ev.clientX) + 'px';
+        popMessage.style.top = (ev.clientY) + 'px';
+        
+      }
+      
+    }
+    
+    function handlePopMessageExit() {
+      popMessageExitButton.addEventListener('mousedown', function(ev) {
+        
+        // Makes sure the iframes are displayed again.
+        var iframes = document.getElementsByTagName('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+          iframes[i].classList.remove('hidden');
+        }
+        
+        //TODO: Make it so all the eventlisteners can be removed (aren't anonymous functions).
+        // Probably doesn't entirely remove child from memory.
+        popMessageContainer.removeChild(popMessage);
+      });
+    }
+    
+    // Prevents things from being selected when click and drag is performed.
+    function pauseEvent(e){
+      if(e.stopPropagation) e.stopPropagation();
+      if(e.preventDefault) e.preventDefault();
+      e.cancelBubble=true;
+      e.returnValue=false;
+      return false;
+    }
   });
   
   // Makes everyone's computers focus on the tab and page, even if they're in another program and fullscreened. Use sparingly. (Only tested in Windows.)
@@ -425,6 +530,7 @@ function handleClientEmits() {
     chatFormInput.value = "";
   });
 };
+
 
 // ! End of Central Functions' Definitions Section !
 
