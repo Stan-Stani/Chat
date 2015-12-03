@@ -169,6 +169,14 @@ function handleClientConnects() {
       console.log('Pop Message by ' + qualifiedUserText + msg);
     });
     
+    socket.on('pop message -no-cm-html-render', function(msg) {
+      io.emit('pop message', msg);
+      msg = msg.replace(/</g, '&lt');
+      msg = msg.replace(/>/g, '&gt');
+      io.emit('chat message', '<h3>Pop Message by ' + qualifiedUserText + '</h3>' + msg);
+      console.log('Pop Message by ' + qualifiedUserText + msg);
+    });
+    
     socket.on('username submit', function(name) {
       userName = name;
       uriName = encodeURIComponent(name);

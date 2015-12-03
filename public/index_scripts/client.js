@@ -525,7 +525,16 @@ function handleClientEmits() {
       } else if (first6Characters === '![pop]') {
         // match '![pop][any-character=except-close-square-bracket-before-end-of-string-and/or-new-line-characters]'
         var fullMatchedString = inputValue.match(/^!\[pop\]\[.+?\]$/);
-        if (fullMatchedString) {
+        console.log(fullMatchedString[0] + 'hellooooo');
+        var fullMatchedStringWithArgument = inputValue.match(/^!\[pop\]\[.+?\]\[ignoreHtml\]$/);
+        // Allows html in chat  message to be ignored and displayed only as plain text
+        if (fullMatchedStringWithArgument) {
+          console.log(fullMatchedStringWithArgument + ' o');
+          var partialMatchedString = fullMatchedStringWithArgument[0].substring(7, fullMatchedStringWithArgument[0].length - 13);
+          console.log(partialMatchedString + 'je');
+          socket.emit('pop message -no-cm-html-render', partialMatchedString);
+          // Renders html in the chat message normally
+        } else if (fullMatchedString) {
           var partialMatchedString = fullMatchedString[0].substring(7, fullMatchedString[0].length - 1);
           socket.emit('pop message', partialMatchedString);
         }
