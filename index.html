@@ -40,6 +40,7 @@
     
     .pop-message {
       background-color: transparent;
+      cursor: move;
     }
     
     .pop-message-content {
@@ -52,11 +53,16 @@
       height: 15px;
       width: 15px;
       margin-left: 5px;
-      background-color: red;
+      background-color: firebrick;
       font-family: monospace;
       vertical-align: top;
       text-align: center;
       float: left;
+      cursor: default;
+    }
+    
+    .pop-message-exit-button:hover {
+      background-color: red;
     }
     
     .pop-message-drag-tab {
@@ -70,7 +76,7 @@
       writing-mode: vertical-lr;
       word-wrap: break-word;
       float: left;
-      
+      cursor: move;
     }
     
     </style>

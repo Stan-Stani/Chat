@@ -219,7 +219,9 @@ function handleServerEmits() {
   var popMessageContainer = document.getElementById('pop-message-container');
   var messages = document.getElementById('messages')
   socket.on('chat message', function(msg){
-    messages.innerHTML += '<li>' + msg + '</li>';
+    var newLi = document.createElement('li')
+    newLi.innerHTML = msg;
+    messages.appendChild(newLi);
     scrollMessagesDown();
     var sound = document.getElementById('coin-get');
     manageSound(sound);
@@ -240,6 +242,7 @@ function handleServerEmits() {
     var popMessageContent = document.createElement('div');
     var popMessageExitButton = document.createElement('div');
     var popMessageDragTab = document.createElement('div');
+    var popMessageClientXandLeftDiff, popMessageClientYandTopDiff
     popMessage.setAttribute('id', 'pop-message-' + popMessageIdNumber);
     popMessage.className += ' pop-message';
     // Flex keeps elements on same line even though containing div is of 0 width and height
@@ -279,7 +282,11 @@ function handleServerEmits() {
       });
       
       function followMouseMove(ev) {
-      
+        // These allow the div to be dragged without warping it's top left corner to the mouse position when dragging starts.
+        var popMessageBounds = popMessage.getBoundingClientRect();
+        popMessageClientXandLeftDiff = (ev.clientX - popMessageBounds['left']);
+        popMessageClientYandTopDiff = (ev.clientY - popMessageBounds['top']);
+        
          // Let's the div be dragged anywhere in viewport which isn't possible when iframes are displaying.
         var iframes = document.getElementsByTagName('iframe');
         for (var i = 0; i < iframes.length; i++) {
@@ -298,15 +305,13 @@ function handleServerEmits() {
 
        
       function setDivPosition(ev) {
-        var popMessageBounds = popMessage.getBoundingClientRect();
-        
-        // These are for later. Eventually the dragging will work without warping the top left corner to the mouse location when you start to drag it.
-        var popMessageClientXandLeftDiff = (ev.clientX - popMessageBounds['left']);
-        var popMessageClientYandTopDiff = (ev.clientY - popMessageBounds['top']);
         
         
-        popMessage.style.left = (ev.clientX) + 'px';
-        popMessage.style.top = (ev.clientY) + 'px';
+        
+        
+        
+        popMessage.style.left = (ev.clientX - popMessageClientXandLeftDiff) + 'px';
+        popMessage.style.top = (ev.clientY - popMessageClientYandTopDiff) + 'px';
         
       }
       
@@ -566,7 +571,9 @@ function setCookie(name, value, expDate) {
 };
 
 function alertClient(msg) {
-  messages.innerHTML += '<li>' + msg + '</li>'
+  var newLi = document.createElement('li');
+  newLi.innerHTML = msg;
+  messages.appendChild(newLi);
   scrollMessagesDown();
 };
 
