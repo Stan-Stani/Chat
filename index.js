@@ -385,6 +385,8 @@ function handleClientConnects() {
         });
       }
     });
+    
+    io.emit('user connection state change', {userName: userName, status: 'connected'})
   };
 };
 

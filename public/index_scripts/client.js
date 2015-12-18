@@ -7,6 +7,7 @@ var socket = io();
 var chatForm = document.getElementById("chat-form");
 var chatFormInput = document.getElementById("chat-form-input");
 var current_client_saved_username;
+var connectedUsers = [];
 
 
 
@@ -37,6 +38,7 @@ handleSetUsername();
 alertClientConnect();
 handleServerEmits();
 handleClientEmits();
+fadeOutWelcome();
 // ! End of Central Function Calls Section !
 
 // ! Central Functions' Definitions Section !
@@ -347,6 +349,12 @@ function handleServerEmits() {
     alert("Yo, I'm tawkin to yeh!");
   });
   
+  socket.on('user connection state change', function(userObject) {
+    if (userObject['state'] === 'connected') {
+      connectedUsers.push(userObject['userName']);
+    }
+  });
+  
   socket.on('reconnect', function() {
     console.log(current_client_saved_username);
     if (current_client_saved_username) {
@@ -544,6 +552,15 @@ function handleClientEmits() {
     chatFormInput.value = "";
   });
 };
+
+// Removes welcome animation after fading it out after specified amount of time.
+function fadeOutWelcome() {
+  var welcomeAnim = document.getElementById('hover-page')
+  setTimeout(function() {
+    welcomeAnim.classList.add('fadeOut', 'animated');
+    setTimeout(function() {document.body.removeChild(welcomeAnim)}, 1025);
+  }, 5000);
+}
 
 
 // ! End of Central Functions' Definitions Section !

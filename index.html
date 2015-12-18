@@ -8,6 +8,38 @@
   <title>Chat (Echo Me 2.0)</title>
   
   <style>
+    .animated {
+      -webkit-animation-duration: 1s;
+      animation-duration: 1s;
+      -webkit-animation-fill-mode: both;
+      animation-fill-mode: both;
+    }
+    
+   @-webkit-keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    .fadeOut {
+      -webkit-animation-name: fadeOut;
+      animation-name: fadeOut;
+    }
+    
      ul, li, body, #chat-form, #chat-form-input, form button, div { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
       /* position: absolute & height/height: 100% so I can use percentages with #message-container */
