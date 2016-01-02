@@ -385,7 +385,7 @@ function handleClientConnects() {
         });
       }
     });
-    
+    // Started implementing user list. TODO: Finish.
     io.emit('user connection state change', {userName: userName, status: 'connected'})
   };
 };

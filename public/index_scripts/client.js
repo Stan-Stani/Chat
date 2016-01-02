@@ -592,6 +592,7 @@ function getAllIndexes(arr, val) {
 function setCookie(name, value, expDate) {
   //If expDate exists then convert to UTC format
   (expDate) && (expDate = expDate.toUTCString());
+  // var c_value = encodeURI(value) +  (if expDate === undefined OR null return "" if it doesn't equal undefined OR null return "; expires=" + expDate);
   var c_value = encodeURI(value) + ((expDate === null || expDate === undefined) ? "" : "; expires=" + expDate);
   document.cookie = name + "=" + c_value;
 };
