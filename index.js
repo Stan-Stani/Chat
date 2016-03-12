@@ -68,12 +68,12 @@ function startServingContent() {
 
 
   // Finishes serving initialization by starting server listening
-  var httpPort = 80;
+  var httpPort = 2000;
   http.listen(httpPort, function(){
     console.log('http server listening on ' + httpPort.toString());
   });
   
-  var httpsPort = 443;
+  var httpsPort = 2001;
   https.listen(httpsPort, function() {
     console.log('https server listening on ' + httpsPort.toString());
   });
